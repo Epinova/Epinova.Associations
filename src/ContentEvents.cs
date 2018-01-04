@@ -1,6 +1,9 @@
 ﻿using System.Collections.Generic;
 using EPiServer;
 using EPiServer.Core;
+using EPiServer.Data.Entity;
+using EPiServer.DataAccess;
+using EPiServer.Security;
 using EPiServer.ServiceLocation;
 
 namespace Epinova.Associations
@@ -33,7 +36,7 @@ namespace Epinova.Associations
             {
                 IEnumerable<ContentReference> associationRemovalTargets = contentAssociationsHelper.GetAssociationRemovalTargets(property, currentContentVersion, associationSourceContent);
 
-                var propertyName = property.Name;
+                var propertyName = contentAssociationsHelper.GetAssociatedPropertyName(property);
                 foreach (var associationRemovalTarget in associationRemovalTargets)
                     propertyWriter.RemoveAssociation(associationSourceContent, associationRemovalTarget, propertyName);
                 
@@ -44,6 +47,36 @@ namespace Epinova.Associations
             }
 
             showstopper.StartShow();
+        }
+
+
+        public static void RemoveRelationalContent(object sender, ContentEventArgs args)
+        {
+            // Only work magic on waste basket
+            if (!args.TargetLink.Equals(ContentReference.WasteBasket))
+                return;
+
+            //can't really do anything without a contentlink in the args...
+            if (ContentReference.IsNullOrEmpty(args.ContentLink))
+                return;
+
+            // Remove all elements in association properties and publish page. Publish event will handle the rest
+            var contentRepository = ServiceLocator.Current.GetInstance<IContentRepository>();
+            var content = contentRepository.Get<IContent>(args.ContentLink) as IReadOnly;
+
+            var contentClone = content?.CreateWritableClone() as IAssociationContent;
+            if(contentClone == null)
+                return;
+
+            var contentAssociationsHelper = ServiceLocator.Current.GetInstance<ContentInspector>();
+            var associationProperties = contentAssociationsHelper.GetAssociationProperties(contentClone);
+
+            foreach (var associationProperty in associationProperties)
+            {
+                contentClone.Property[associationProperty.Name].Clear();
+            }
+
+            contentRepository.Save(contentClone, SaveAction.Publish | SaveAction.SkipValidation, AccessLevel.NoAccess);
         }
     }
 }

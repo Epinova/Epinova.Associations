@@ -18,7 +18,7 @@ namespace Epinova.Associations
             foreach (var property in contentProperties.Where(x => _supportedTypes.Contains(x.PropertyType)))
             {
                 if(property.GetCustomAttributes<ContentAssociationAttribute>().Any())
-                yield return property;
+                    yield return property;
             }
         }
 
@@ -114,6 +114,15 @@ namespace Epinova.Associations
             }
 
             throw new Exception("Attempt to use property on unsupported property. Currently, ContentReference, ContentArea and IList<ContentReference> is supported");
+        }
+
+        public string GetAssociatedPropertyName(PropertyInfo property)
+        {
+            var attribute = Attribute.GetCustomAttribute(property, typeof(ContentAssociationAttribute)) as ContentAssociationAttribute;
+            if (string.IsNullOrEmpty(attribute?.AssociatedPropertyName))
+                return property.Name;
+            
+            return attribute.AssociatedPropertyName;
         }
     }
 }
