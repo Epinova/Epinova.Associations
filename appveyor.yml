@@ -49,7 +49,8 @@ for:
 
   before_build:
   - cmd: nuget restore
-  - cmd: IF NOT DEFINED %APPVEYOR_PULL_REQUEST_NUMBER% choco install "sonarscanner-msbuild-net46" -y
-  - cmd: IF NOT DEFINED %APPVEYOR_PULL_REQUEST_NUMBER% SonarScanner.MSBuild.exe begin /k:"%sonarcloudproj%" /d:"sonar.host.url=https://sonarcloud.io" /o:"%sonarcloudorg%" /d:"sonar.login=%sonarcloudkey%"
+# Secure variables are not expanded in PR builds, hence the IF-tests
+  - cmd: IF DEFINED sonarcloudkey choco install "sonarscanner-msbuild-net46" -y
+  - cmd: IF DEFINED sonarcloudkey SonarScanner.MSBuild.exe begin /k:"%sonarcloudproj%" /d:"sonar.host.url=https://sonarcloud.io" /o:"%sonarcloudorg%" /d:"sonar.login=%sonarcloudkey%"
   after_build:
-  - cmd: IF NOT DEFINED %APPVEYOR_PULL_REQUEST_NUMBER% SonarScanner.MSBuild.exe end /d:"sonar.login=%sonarcloudkey%"
+  - cmd: IF DEFINED sonarcloudkey SonarScanner.MSBuild.exe end /d:"sonar.login=%sonarcloudkey%"
