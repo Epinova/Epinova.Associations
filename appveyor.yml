@@ -35,8 +35,8 @@ deploy:
   skip_symbols: false
   artifact: /.*\.nupkg/
   on:
-    branch: /cms.*/
-    APPVEYOR_REPO_BRANCH: /cms.*/
+    branch: /^cms\d+$/
+    APPVEYOR_REPO_BRANCH: /^cms\d+$/
 
 # here we are going to override common configuration
 for:
@@ -45,7 +45,7 @@ for:
 -
   branches:
     only:
-      - /cms.*/
+      - /^cms\d+$/
 
   before_build:
   - cmd: nuget restore
