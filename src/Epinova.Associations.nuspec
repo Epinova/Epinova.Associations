@@ -5,13 +5,13 @@
     <title>$id$</title>
     <version>$version$</version>
     <authors>Arve Systad</authors>
-    <owners>$author$ - Arve Systad</owners>
+    <owners>Epinova</owners>
     <iconUrl>http://www.epinova.no/favicon.ico</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <projectUrl>https://github.com/Epinova/Epinova.Associations</projectUrl>
     <description>$description$</description>
     <releaseNotes></releaseNotes>
-    <copyright>Copyright © Epinova 2016</copyright>
+    <copyright>Copyright © Epinova 2019</copyright>
     <tags>EPiServer Epinova Basics CMS 11</tags>
     <dependencies>
       <dependency id="EPiServer.CMS.Core" version="[11.0.0, 12.0.0)" />
