@@ -3,8 +3,6 @@ using System.Linq;
 using System.Reflection;
 using EPiServer;
 using EPiServer.Core;
-using EPiServer.Core.Internal;
-using EPiServer.DataAbstraction;
 using EPiServer.DataAccess;
 using EPiServer.Security;
 
@@ -16,18 +14,11 @@ namespace Epinova.Associations
     internal class PropertyWriter
     {
         private readonly IContentRepository _contentRepository;
-        private readonly IContentSoftLinkRepository _contentSoftLinkRepository;
-        private readonly ContentSoftLinkIndexer _contentSoftLinkIndexer;
         private readonly Showstopper _showstopper;
 
-        public PropertyWriter(IContentRepository contentRepository,
-            IContentSoftLinkRepository contentSoftLinkRepository,
-            ContentSoftLinkIndexer contentSoftLinkIndexer,
-            Showstopper showstopper)
+        public PropertyWriter(IContentRepository contentRepository, Showstopper showstopper)
         {
             _contentRepository = contentRepository;
-            _contentSoftLinkRepository = contentSoftLinkRepository;
-            _contentSoftLinkIndexer = contentSoftLinkIndexer;
             _showstopper = showstopper;
         }
 
@@ -102,7 +93,6 @@ namespace Epinova.Associations
 
             _showstopper.StopShowFor(associationTarget.ID);
             _contentRepository.Save(writableRelatedContent, GetSaveAction(writableRelatedContent), AccessLevel.NoAccess);
-            UpdateSoftLinks(writableRelatedContent);
         }
 
         /// <summary>
@@ -159,14 +149,6 @@ namespace Epinova.Associations
 
             _showstopper.StopShowFor(writableAssociationRemovalTargetContent.ContentLink.ID);
             _contentRepository.Save(writableAssociationRemovalTargetContent, GetSaveAction(writableAssociationRemovalTargetContent), AccessLevel.NoAccess);
-            UpdateSoftLinks(writableAssociationRemovalTargetContent);
-        }
-
-        private void UpdateSoftLinks(IContent content)
-        {
-            if (!(content is ILocalizable localizableContent)) return;
-            var softLinks = _contentSoftLinkIndexer.GetLinks(content);
-            _contentSoftLinkRepository.Save(content.ContentLink.ToReferenceWithoutVersion(), localizableContent.Language, softLinks, false);
         }
 
         private SaveAction GetSaveAction(IContent content)
